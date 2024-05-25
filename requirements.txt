@@ -1,1 +1,3 @@
 Replicate
+language_tool_python #To run this you need to have Java installed.
+streamlit
