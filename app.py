@@ -2,6 +2,17 @@ import streamlit as st
 import replicate
 import os
 import language_tool_python
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Debugging: Check if the environment variable is loaded
+api_key = os.getenv('REPLICATE_API_TOKEN')
+if api_key is None:
+    print("REPLICATE_API_TOKEN is not set in the environment variables.")
+else:
+    print(f"REPLICATE_API_TOKEN: {api_key}")
+
 
 # App title
 st.set_page_config(page_title="Socialize")
@@ -9,15 +20,13 @@ st.set_page_config(page_title="Socialize")
 # Replicate Credentials
 with st.sidebar:
     st.title('Socialize')
-    if 'REPLICATE_API_TOKEN' in st.secrets:
-        st.success('API key already provided!', icon='✅')
-        replicate_api = st.secrets['REPLICATE_API_TOKEN']
+    
+    replicate_api = os.getenv('REPLICATE_API_TOKEN')
+
+    if replicate_api:
+        st.success('API key loaded from .env file!', icon='✅')
     else:
-        replicate_api = st.text_input('Enter Replicate API token:', type='password')
-        if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
-            st.warning('Please enter your credentials!', icon='⚠️')
-        else:
-            st.success('Proceed to entering your prompt message!', icon='👉')
+        st.error('API key not found in .env file!', icon='❌')
 
     # Refactored from https://github.com/a16z-infra/llama2-chatbot
     st.subheader('Models and parameters')
@@ -32,9 +41,15 @@ with st.sidebar:
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.1, step=0.01)
     top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
     max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
-    
-    st.markdown(' [Socialize](https://resonant-custard-295efc.netlify.app/)!')
-os.environ['REPLICATE_API_TOKEN'] = replicate_api
+
+        # Function to handle redirection
+    def redirect_to_socialize():
+            st.markdown('[Socialize Web blog](https://resonant-custard-295efc.netlify.app/)')
+        # Display the button
+    if st.button('Socialize'):
+            redirect_to_socialize()
+
+
 
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
